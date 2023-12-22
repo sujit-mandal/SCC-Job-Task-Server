@@ -38,16 +38,33 @@ async function run() {
       console.log(result);
     });
 
-    app.get("/tasks", async (req, res) => {
-      const result = await taskCollections.find().toArray();
+    app.get("/tasks/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await taskCollections.find(query).toArray();
       console.log(result);
       res.send(result);
     });
-    app.patch("/update-task/:id", async (req, res) => {
+    app.patch("/update-task-status/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const updateDocument = {
         $set: { status: req.body.status },
+      };
+      const result = await taskCollections.updateOne(query, updateDocument);
+      res.send(result);
+    });
+    app.patch("/update-task/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body.updatedTask;
+      const query = { _id: new ObjectId(id) };
+      const updateDocument = {
+        $set: {
+          title: data.title,
+          description: data.description,
+          date: data.date,
+          priority: data.priority,
+        },
       };
       const result = await taskCollections.updateOne(query, updateDocument);
       res.send(result);
@@ -63,6 +80,7 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await taskCollections.deleteOne(query);
       res.send(result);
+      console.log(result);
     });
   } finally {
   }
